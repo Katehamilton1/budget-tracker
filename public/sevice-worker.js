@@ -2,12 +2,11 @@ const CACHE_NAME = 'budget-site-cache-v1';
 const DATA_CACHE_NAME = 'budget-data-cache-v1';
 
 const FILES_TO_CACHE = [
-    `/db.js`,
-    `/index.html`,
-    `/index.js`,
-    `/index.css`,
-    `/manifest.webmanifest`,
-    `/img/icons/money.png`
+    '/index.html',
+    '/manifest.json',
+    '/css/styles.css',
+    '/js/idb.js',
+    '/js/index.js'
 ];
 
 self.addEventListener(`install`, event => {
@@ -19,21 +18,23 @@ self.addEventListener(`install`, event => {
 });
 
 self.addEventListener(`activate`, event => {
-    const currentCaches = [CACHE_NAME), RUNTIME_CACHE];
-    event.waitUntil(
-        caches
-            .keys()
-            .then(cacheNames =>
-                // return array of cache names that are old to delete
-                cacheNames.filter(cacheName => !currentCaches.includes(cacheName))
+    const currentCaches =
+        [CACHE_NAME),
+    RUNTIME_CACHE];
+event.waitUntil(
+    caches
+        .keys()
+        .then(cacheNames =>
+            // return array of cache names that are old to delete
+            cacheNames.filter(cacheName => !currentCaches.includes(cacheName))
+        )
+        .then(cachesToDelete =>
+            Promise.all(
+                cachesToDelete.map(cacheToDelete => caches.delete(cacheToDelete))
             )
-            .then(cachesToDelete =>
-                Promise.all(
-                    cachesToDelete.map(cacheToDelete => caches.delete(cacheToDelete))
-                )
-            )
-            .then(() => self.clients.claim())
-    );
+        )
+        .then(() => self.clients.claim())
+);
 });
 
 self.addEventListener(`fetch`, event => {
@@ -45,7 +46,7 @@ self.addEventListener(`fetch`, event => {
         return;
     }
 
-    if (event.request.url.includes(`/api/transaction`)) {
+    if (event.request.url.includes(`/api/transactions`)) {
         event.respondWith(
             caches.open(RUNTIME_CACHE).then(cache =>
                 fetch(event.request)
