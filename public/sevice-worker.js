@@ -1,21 +1,19 @@
 self.addEventListener("install", function(event) {
-    // Perform install steps
     event.waitUntil(
       caches.open(CACHE_NAME).then(function(cache) {
-        console.log("Opened cache");
+        console.log("Open cache");
         return cache.addAll(urlsToCache);
       })
     );
   });
   
   self.addEventListener("fetch", function(event) {
-    // cache all get requests to /api routes
     if (event.request.url.includes("/api/")) {
       event.respondWith(
         caches.open(DATA_CACHE_NAME).then(cache => {
           return fetch(event.request)
             .then(response => {
-              // If the response was good, clone it and store it in the cache.
+             
               if (response.status === 200) {
                 cache.put(event.request.url, response.clone());
               }
@@ -23,7 +21,6 @@ self.addEventListener("install", function(event) {
               return response;
             })
             .catch(err => {
-              // Network request failed, try to get it from the cache.
               return cache.match(event.request);
             });
         }).catch(err => console.log(err))
